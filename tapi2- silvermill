@@ -1,0 +1,74 @@
+#סילבר מיל - תפי 2 - תוכנית קשה- לתת כשיעורי בית לפני השיעור ולפתור יחד בכיתה
+list = [[1, 85], [2, 50], [3, 62], [4, 86], [5, 45],[6,32]]
+order_cost = int(input("enter the order cost"))
+storage_cost = float(input("enter the storage cost"))
+
+new_t_start=0
+n = 0
+temp_list=[] #רשימה זמנית מתוכה בוחרים את הערך הקטן ביותר שיהווה את התקופה עם העלות הקטנה ביותר
+done_list=[] #הרשימה הסופית של התקופות עם העלויות הכי נמוכות
+tt_list=[] #רשימת הסופים של כל התקופות שנבחרו עם העלויות הנמוכות ביותר. לטובת הפסקת הלולאה הראשית.
+storage_sum=0 #סך עלויות האחסון לתקופה שנבדקת
+final_program=[]
+for t_start in range(len(list)+1): #לולאה חיצונית- עוברת על תחיליות התקופות הנבדקות
+
+   #אתחול משתנים על מנת להשתמש בהם מחדש בלולאה הפנימית
+    storage_sum = 0
+    temp_list=[]
+    #פונקציה לדילוג על השלבים מהם כבר נבחרה תקופה
+    if t_start<new_t_start:
+        t_start=new_t_start
+    #תנאי עצירה- אם האיבר האחרון ברשימת סופי התקופות שווה לאיבר האחרון ברשימה שקיבלנו אזי ניתן לעצור
+    if len(tt_list)>0:
+         if tt_list[len(tt_list)-1]==len(list):
+            break
+    #לולאה פנימית - מעלה את סוף התקופה
+    for t_end in range(len(list)+1 ):
+        n = t_end - t_start;
+        #למשל תקופה 0-0
+        if n == 0:
+            t_end += 1
+
+        #למשל תקופה 0-1
+        if n == 1:
+            t_average_cost = order_cost/n #חישוב עלות התקופה
+            temp_list.append(t_average_cost) #הכנסה לרשימה הזמנית
+
+        #למשל תקופות 0-2 0-3 וכו'
+        if n>1:
+            #לולאה לסכימת עלויות האחסון של האיברים בתקופה
+            for i in range (t_start+(n),t_end+1):
+                storage_sum+=list[i-1][1]*1*(n-1) #סכימת עלויות האחסון
+                i += 1
+
+            t_average_cost = (order_cost+storage_sum)/n #חישוב עלות התקופה
+            temp_list.append(t_average_cost) #הכנסה לרשימה הזמנית
+
+
+        len_temp_list= len(temp_list)
+        #אם קיימים איברים ברשימה הזמנית
+        if len_temp_list>0:
+            #אם הייתה מגמת עלייה
+            if temp_list[len_temp_list-1]>temp_list[len_temp_list-2]:
+
+                done_list.append(temp_list[len_temp_list-2]) #הכנס לרשימה הסופית את האיבר שהיה לפני העלייה - כלומר הנמוך ביותר
+                tt_list.append(t_end-1) #הכנס לרשימה את סוף התקופה שנבחרה -לטובת תנאי עצירה של הלולאה החיצונית
+                final_program.append([[t_start],[t_end-1]])
+                new_t_start = t_end-1 #על מנת לדלג על תקופות האמצע בלולאה החיצונית
+                break #יציאה ללואה החיצונית
+
+            #אם נשארה רק תקופה אחרונה (למשל מתוך 6 תקופות, תקופה 5-6) צריך להוסיף אותה
+            if t_end == len(list):
+                done_list.append(temp_list[0]) #הוספת האיבר לרשימה הסופית (תמיד יהיה שווה לעלות ההזמנה)
+                tt_list.append(t_end) #הוספה לרשימה של סופי התקופות שנבחרו
+                final_program.append([[t_start], [t_end]])
+                t_end += 1
+                break #יציאה ללואה החיצונית
+
+        t_end+=1
+    t_start+=1
+
+
+
+print("the periods we need to do orders: ",final_program)
+print("orders cost of each order:" ,done_list)
